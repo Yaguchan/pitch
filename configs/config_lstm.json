@@ -1,0 +1,26 @@
+{   
+    "outdir": "exp/width1_shift1/lstm",
+    "seed": 42,
+    "cuda": true,
+    "gpu_device": 0,
+    "model": 0,
+    "data_params": {
+        "data_dir": "/mnt/aoni04/yaguchi/code/kayanuma/Pitch_aoni04/data/revised/width1_shift1"
+    },
+    "img_params": {
+        "data_dir": "img/width1_shift1/lstm",
+        "data_shift": 10,
+        "start": 10000,
+        "end": 13000
+    },
+    "model_params": {
+        "input_dim": 512,
+        "hidden_dim": 64,
+        "num_layers": 2
+    },
+    "optim_params": {
+        "batch_size": 1,
+        "learning_rate": 1e-3
+    },
+    "num_epochs": 50
+}

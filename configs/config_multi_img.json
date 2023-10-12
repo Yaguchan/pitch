@@ -1,0 +1,15 @@
+{   
+    "config_lstm": "configs/config_lstm.json",
+    "config_linear": "configs/config_linear.json",
+    "config_transformer": "configs/config_transformer.json",
+    "seed": 42,
+    "cuda": true,
+    "gpu_device": 0,
+    "model": 0,
+    "data_params": {
+        "data_dir": "/mnt/aoni04/yaguchi/code/pitch_konno/data/just_basic5000_downsampling"
+    },
+    "optim_params": {
+        "batch_size": 1
+    }
+}
