@@ -79,9 +79,9 @@ class PitchModel_LSTM(nn.Module):
         super().__init__()
         self.config = config
         self.device = device   
-        self.lstm = nn.LSTM(input_size=config.model_params.input_dim, hidden_size=config.model_params.hidden_dim, num_layers=config.model_params.num_layers, dropout=0.5, batch_first=True, bidirectional=True)
-        self.fc2 = nn.Linear(config.model_params.hidden_dim*2, 1)
-        self.fc3 = nn.Linear(config.model_params.hidden_dim*2, 1)
+        self.lstm = nn.LSTM(input_size=config.model_params.input_dim, hidden_size=config.model_params.hidden_dim, num_layers=config.model_params.num_layers, batch_first=True, bidirectional=config.model_params.bidirectional)
+        self.fc2 = nn.Linear(config.model_params.hidden_dim, 1)
+        self.fc3 = nn.Linear(config.model_params.hidden_dim, 1)
         self.relu = nn.ReLU()
         self.sigmoid = torch.nn.Sigmoid()
         self.critation = nn.MSELoss(reduction='sum')
