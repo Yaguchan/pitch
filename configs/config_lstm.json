@@ -15,12 +15,13 @@
     },
     "model_params": {
         "input_dim": 512,
-        "hidden_dim": 64,
-        "num_layers": 2
+        "hidden_dim": 512,
+        "num_layers": 1,
+        "bidirectional": false
     },
     "optim_params": {
         "batch_size": 1,
         "learning_rate": 1e-3
     },
-    "num_epochs": 50
+    "num_epochs": 30
 }
