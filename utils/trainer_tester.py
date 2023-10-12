@@ -37,7 +37,7 @@ def val(model, data_loader, deivce):
     return total_loss
 
 
-def test(model, data_loader, save_cm, deivce):
+def test(model, data_loader, save_path, deivce):
     model.eval()
     total_loss = 0.0
     pred_all = np.array([])
@@ -58,6 +58,7 @@ def test(model, data_loader, save_cm, deivce):
     total_loss = total_loss / len(data_loader)
     cm = confusion_matrix(target_all, pred_all)
     sns.heatmap(cm, annot=True, cmap='Blues', fmt='d')
+    plt.savefig(os.path.join(save_path, 'cm.png'))
     print('------------------------------------')
     print('Test loss : {}'.format(total_loss))
     print('------------------------------------')
@@ -66,7 +67,15 @@ def test(model, data_loader, save_cm, deivce):
     print(f'recall   : {recall_score(target_all, pred_all)}')
     print(f'f1       : {f1_score(target_all, pred_all)}')
     print('------------------------------------')
-    plt.savefig(os.path.join(save_cm, 'cm.png'))
+    with open(os.path.join(save_path, 'vad.txt'), 'w') as f:
+        f.write('------------------------------------\n')
+        f.write('Test loss : {}\n'.format(total_loss))
+        f.write('------------------------------------\n')
+        f.write(f'accuracy : {accuracy_score(target_all, pred_all)}\n')
+        f.write(f'precision: {precision_score(target_all, pred_all)}\n')
+        f.write(f'recall   : {recall_score(target_all, pred_all)}\n')
+        f.write(f'f1       : {f1_score(target_all, pred_all)}\n')
+        f.write('------------------------------------\n')
     
     
 def trainer(num_epochs, model, loader_dict, optimizer, device, outdir):
