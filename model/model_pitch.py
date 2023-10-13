@@ -70,6 +70,21 @@ class PitchModel_Linear(nn.Module):
         pred2 = (self.sigmoid(pred2) >= 0.5).int()
         
         return pred, target, pred2, target2
+    
+    
+    def demo_inference(self, spec):
+        x = spec.to(self.device)
+        b, t, _, _ = x.shape
+        x = x.reshape(b, t, -1)
+        x = self.relu(self.fc0(x))
+        x = self.relu(self.fc1(x))
+        x1 = self.fc2(x)
+        pred = x1.reshape(b, -1)
+        x2 = self.fc3(x)
+        pred2 = x2.reshape(b, -1)
+        pred2 = (self.sigmoid(pred2) >= 0.5).int()
+        
+        return pred, pred2
 
 
 
@@ -129,6 +144,20 @@ class PitchModel_LSTM(nn.Module):
         pred2 = (self.sigmoid(pred2) >= 0.5).int()
 
         return pred, target, pred2, target2
+    
+    
+    def demo_inference(self, spec):
+        x = spec.to(self.device)
+        b, t, _, _ = x.shape
+        x = x.reshape(b, t, -1)
+        x, _ = self.lstm(x)
+        x1 = self.fc2(x)
+        pred = x1.reshape(b, -1)
+        x2 = self.fc3(x)
+        pred2 = x2.reshape(b, -1)
+        pred2 = (self.sigmoid(pred2) >= 0.5).int()
+
+        return pred, pred2
 
 
 class PitchModel_Transformer(nn.Module):
@@ -302,6 +331,32 @@ class PitchModel_CNN(nn.Module):
         pred2 = (self.sigmoid(pred2) >= 0.5).int()
 
         return pred, target, pred2, target2
+    
+    
+    def demo_inference(self, spec):
+        x = spec.to(self.device)
+        b, t, _, _ = x.shape
+        x = x.reshape(b*t, self.input_dim, -1) 
+        x = torch.unsqueeze(x, dim=1)
+        x = F.relu(self.floor(x))
+        x = F.relu(self.c1(x))
+        x = self.bnc1(x)
+        x = F.relu(self.c2(x))
+        x = self.bnc2(x)
+        x = F.relu(self.c3(x))
+        x = self.bnc3(x)
+        x = F.relu(self.c4(x))
+        x = self.bnc4(x)
+        x = x.reshape(x.shape[0], -1)
+        x = F.relu(self.fc1(x))
+        x = x.reshape(b, t, -1)
+        x1 = self.fc2(x)
+        pred = x1.reshape(b, -1)
+        x2 = self.fc3(x)
+        pred2 = x2.reshape(b, -1)
+        pred2 = (self.sigmoid(pred2) >= 0.5).int()
+
+        return pred, pred2, 
 
 
 
@@ -400,6 +455,32 @@ class PitchModel_CNN10(nn.Module):
         pred2 = (self.sigmoid(pred2) >= 0.5).int()
         
         return pred, target, pred2, target2
+    
+    
+    def demo_inference(self, spec):   
+        x = spec.to(self.device)
+        b, t, _, _ = x.shape
+        x = x.reshape(b*t, self.input_dim, 10)
+        x = torch.unsqueeze(x, dim=1)
+        x = F.relu(self.floor(x))
+        x = F.relu(self.c1(x))
+        x = self.bnc1(x)
+        x = F.relu(self.c2(x))
+        x = self.bnc2(x)
+        x = F.relu(self.c3(x))
+        x = self.bnc3(x)
+        x = F.relu(self.c4(x))
+        x = self.bnc4(x)
+        x = x.reshape(x.shape[0], -1)
+        x = self.relu(self.fc1(x))
+        x = x.reshape(b, t, -1)
+        x1 = self.fc2(x)
+        pred = x1.reshape(b, -1)
+        x2 = self.fc3(x)
+        pred2 = x2.reshape(b, -1)
+        pred2 = (self.sigmoid(pred2) >= 0.5).int()
+        
+        return pred, pred2
 
 
 
@@ -458,3 +539,17 @@ class PitchModel_CNNAE(nn.Module):
         pred2 = (self.sigmoid(pred2) >= 0.5).int()
         
         return pred, target, pred2, target2
+    
+    
+    def demo_inference(self, spec):
+        x = spec.to(self.device)
+        b, t, _ = x.shape
+        x = x.reshape(b, t, -1)
+        x, _ = self.lstm(x)
+        x1 = self.fc2(x)
+        pred = x1.reshape(b, -1)
+        x2 = self.fc3(x)
+        pred2 = x2.reshape(b, -1)
+        pred2 = (self.sigmoid(pred2) >= 0.5).int()
+        
+        return pred, pred2
