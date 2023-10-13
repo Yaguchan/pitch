@@ -3,15 +3,12 @@ import wave
 import numpy as np
 import spec_image_torch
 from tqdm import tqdm
-
-# wav -> spectrogram
-# generator = spec_image_torch.SpectrogramImageGeneratorTorch(ramesize=800, frameshift=160, image_width=10, image_shift=5)
 generator = spec_image_torch.SpectrogramImageGeneratorTorch(ramesize=800, frameshift=160, image_width=10, image_shift=5)
 
-# CSJ/wav の場所
+
 CSJDATA = '/mnt/aoni01/db/CSJ/USB/WAV/core'
-# スペクトルグラムの保存場所
 OUTPUTDIR = '/mnt/aoni04/yaguchi/code/pitch/data/spectrogram_10'
+
 
 def main():
     names = os.listdir(CSJDATA)
@@ -26,6 +23,7 @@ def main():
         # pad = np.zeros(int(16000*0.05), np.int16)
         # x = np.concatenate([pad, x, pad])
         spec = generator.input_wave(x)
+        generator.reset()
         np.save(spec_path, spec)
 
 if __name__ == '__main__':
