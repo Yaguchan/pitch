@@ -5,7 +5,7 @@
     "gpu_device": 0,
     "model": 1,
     "data_params": {
-        "data_dir": "/mnt/aoni04/yaguchi/code/kayanuma/Pitch_aoni04/data/revised/width1_shift1"
+        "data_dir": "/mnt/aoni04/yaguchi/code/pitch/data/width1_shift1"
     },
     "img_params": {
         "data_dir": "img/width1_shift1/transformer",

@@ -7,7 +7,7 @@
     "gpu_device": 0,
     "model": 0,
     "data_params": {
-        "data_dir": "/mnt/aoni04/yaguchi/code/pitch_konno/data/just_basic5000_downsampling"
+        "data_dir": "/mnt/aoni04/yaguchi/code/pitch/data/width1_shift1"
     },
     "optim_params": {
         "batch_size": 1

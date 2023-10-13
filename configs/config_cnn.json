@@ -5,7 +5,7 @@
     "gpu_device": 1,
     "model": 3,
     "data_params": {
-        "data_dir": "/mnt/aoni04/yaguchi/code/kayanuma/Pitch_aoni04/data/revised/width1_shift1"
+        "data_dir": "/mnt/aoni04/yaguchi/code/pitch/data/width1_shift1"
     },
     "img_params": {
         "data_dir": "img/width1_shift1/cnn",
@@ -15,7 +15,7 @@
     },
     "model_params": {
         "input_dim": 512,
-        "hidden_dim": 128
+        "hidden_dim": 256
     },
     "optim_params": {
         "batch_size": 1,

@@ -5,7 +5,7 @@
     "gpu_device": 1,
     "model": 5,
     "data_params": {
-        "data_dir": "/mnt/aoni04/yaguchi/code/kayanuma/Pitch_aoni04/data/cnnae/width10_shift5"
+        "data_dir": "/mnt/aoni04/yaguchi/code/pitch/data/cnnae/width10_shift5"
     },
     "img_params": {
         "data_dir": "img/width10_shift5/cnnae",
