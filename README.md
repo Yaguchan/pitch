@@ -25,7 +25,7 @@ python scripts/run_single_img.py configs/config_lstm.json --gpuid 0
 ```
 
 ## デモ（例：LSTM）
-WAV_PATH, SAVE_PATH, IMAGE_WIDTH, IMAGE_SHIFTの設定が必要
+WAV_PATH, IMAGE_WIDTH, IMAGE_SHIFTの設定が必要
 ```
-python scripts/run_single_img.py configs/config_lstm.json --gpuid 0
+python demo/run_demo.py configs/config_lstm.json --gpuid 0
 ```
