@@ -3,15 +3,18 @@
     "seed": 42,
     "cuda": true,
     "gpu_device": 1,
-    "model": 4,
+    "model": 10,
     "data_params": {
         "data_dir": "/mnt/aoni04/yaguchi/code/pitch/data/width10_shift5"
     },
     "img_params": {
-        "data_dir": "img/width10_shift5/cnn10",
+        "data_dir": "/mnt/aoni04/yaguchi/code/pitch/img/width10_shift5/cnn10",
         "data_shift": 50,
         "start": 10000,
         "end": 13000
+    },
+    "demo": {
+        "data_dir": "/mnt/aoni04/yaguchi/code/pitch/demo/img/width10_shift5/cnn10"
     },
     "model_params": {
         "input_dim": 512,

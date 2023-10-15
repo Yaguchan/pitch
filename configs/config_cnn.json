@@ -8,10 +8,13 @@
         "data_dir": "/mnt/aoni04/yaguchi/code/pitch/data/width1_shift1"
     },
     "img_params": {
-        "data_dir": "img/width1_shift1/cnn",
+        "data_dir": "/mnt/aoni04/yaguchi/code/pitch/img/width1_shift1/cnn",
         "data_shift": 10,
         "start": 10000,
         "end": 13000
+    },
+    "demo": {
+        "data_dir": "/mnt/aoni04/yaguchi/code/pitch/demo/img/width1_shift1/cnn"
     },
     "model_params": {
         "input_dim": 512,

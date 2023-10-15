@@ -1,29 +1,29 @@
 {   
-    "outdir": "exp/width1_shift1/transformer",
+    "outdir": "exp/width1_shift1/mb_cnnlstm",
     "seed": 42,
     "cuda": true,
     "gpu_device": 0,
-    "model": 1,
+    "model": 5,
     "data_params": {
         "data_dir": "/mnt/aoni04/yaguchi/code/pitch/data/width1_shift1"
     },
     "img_params": {
-        "data_dir": "/mnt/aoni04/yaguchi/code/pitch/img/width1_shift1/transformer",
+        "data_dir": "/mnt/aoni04/yaguchi/code/pitch/img/width1_shift1/mb_cnnlstm",
         "data_shift": 10,
         "start": 10000,
         "end": 13000
     },
     "demo": {
-        "data_dir": "/mnt/aoni04/yaguchi/code/pitch/demo/img/width1_shift1/transformer"
+        "data_dir": "/mnt/aoni04/yaguchi/code/pitch/demo/img/width1_shift1/mb_cnnlstm"
     },
     "model_params": {
         "input_dim": 512,
-        "nhead": 8,
-        "num_layers": 1
+        "lstm_input_dim": 256,
+        "lstm_hidden_dim": 512
     },
     "optim_params": {
         "batch_size": 1,
-        "learning_rate": 1e-3
+        "learning_rate": 1e-4
     },
-    "num_epochs": 50
+    "num_epochs": 30
 }
