@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from dotmap import DotMap
 from dataset.dataset_pitch import PitchDataset
 from torch.utils.data import DataLoader
-from model.model_pitch import PitchModel_LSTM, PitchModel_Transformer, PitchModel_Linear, PitchModel_CNN, PitchModel_CNN10, PitchModel_CNNAE
+from model.model_pitch import PitchModel_LSTM, PitchModel_Transformer, PitchModel_Linear, PitchModel_CNN, PitchModel_CREPE, PitchModel_MB_CNNLSTM, PitchModel_CNN10, PitchModel_CNNAE
 from utils.trainer_tester import trainer, tester
 import wave
 import librosa
@@ -21,8 +21,6 @@ import sflib.sound.sigproc.spec_image as spec_image
 # python demo/run_demo.py configs/config_lstm.json --gpuid 0
 # WAV_PATH = './demo/wav/BASIC5000_0001.wav'
 WAV_PATH = './demo/wav/yaguchi_yorosiku.wav'
-# WAV_PATH = './demo/wav/A01F0055_mini.wav'
-SAVE_PATH = './demo/img'
 IMAGE_WIDTH=1
 IMAGE_SHIFT=1
 
@@ -69,8 +67,12 @@ def main(args):
     elif config.model == 3:
         model = PitchModel_CNN(config, device)
     elif config.model == 4:
-        model = PitchModel_CNN10(config, device)
+        model = PitchModel_CREPE(config, device)
     elif config.model == 5:
+        model = PitchModel_MB_CNNLSTM(config, device)
+    elif config.model == 10:
+        model = PitchModel_CNN10(config, device)
+    elif config.model == 11:
         model = PitchModel_CNNAE(config, device)
     else:
         print('model error')
@@ -79,7 +81,7 @@ def main(args):
     model.load_state_dict(torch.load(os.path.join(config.outdir, 'best_val_loss_model.pth'))) 
     model.to(device)
     
-    os.makedirs(config.img_params.data_dir, exist_ok=True)
+    os.makedirs(config.demo.data_dir, exist_ok=True)
     
     with torch.no_grad():
         
@@ -102,7 +104,7 @@ def main(args):
         plt.plot(t_datas, pred_all[start:end], color='blue', label='pred')
         plt.legend()
         save_path = WAV_PATH.split('/')[-1].replace('.wav', '')
-        plt.savefig(os.path.join(SAVE_PATH, f'{save_path}.png'))
+        plt.savefig(os.path.join(config.demo.data_dir, f'{save_path}.png'))
         plt.close()
 
 
