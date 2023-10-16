@@ -10,7 +10,7 @@ import torch.nn as nn
 from dotmap import DotMap
 from dataset.dataset_pitch import PitchDataset
 from torch.utils.data import DataLoader
-from model.model_pitch import PitchModel_LSTM, PitchModel_Transformer, PitchModel_Linear, PitchModel_CNN, PitchModel_CREPE, PitchModel_MB_CNNLSTM, PitchModel_CNN10, PitchModel_CNNAE
+from model.model_pitch import PitchModel_LSTM, PitchModel_Transformer, PitchModel_Linear, PitchModel_CNN, PitchModel_CNNLSTM, PitchModel_CNNTransformer, PitchModel_CREPE, PitchModel_MB_CNNLSTM, PitchModel_CNN10, PitchModel_CNN10LSTM, PitchModel_CNNAE
 from utils.trainer_tester import trainer, tester
 
 
@@ -68,12 +68,18 @@ def main(args):
     elif config.model == 3:
         model = PitchModel_CNN(config, device)
     elif config.model == 4:
-        model = PitchModel_CREPE(config, device)
+        model = PitchModel_CNNLSTM(config, device)
     elif config.model == 5:
+        model = PitchModel_CNNTransformer(config, device)
+    elif config.model == 6:
+        model = PitchModel_CREPE(config, device)
+    elif config.model == 7:
         model = PitchModel_MB_CNNLSTM(config, device)
     elif config.model == 10:
         model = PitchModel_CNN10(config, device)
     elif config.model == 11:
+        model = PitchModel_CNN10LSTM(config, device)
+    elif config.model == 12:
         model = PitchModel_CNNAE(config, device)
     else:
         print('model error')
