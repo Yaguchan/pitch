@@ -6,8 +6,6 @@ import torch.nn.init as init
 import matplotlib.pyplot as plt
 import numpy as np
 from torch.nn.parameter import Parameter
-from torchvision.models import resnet50, ResNet50_Weights, vgg16, VGG16_Weights
-from efficientnet_pytorch import EfficientNet
 
 
 
