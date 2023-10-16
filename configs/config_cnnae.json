@@ -3,7 +3,7 @@
     "seed": 42,
     "cuda": true,
     "gpu_device": 1,
-    "model": 11,
+    "model": 12,
     "data_params": {
         "data_dir": "/mnt/aoni04/yaguchi/code/pitch/data/cnnae/width10_shift5"
     },
