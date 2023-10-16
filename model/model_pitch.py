@@ -348,6 +348,212 @@ class PitchModel_CNN(nn.Module):
 
 
 
+class PitchModel_CNNLSTM(nn.Module):
+    
+    def __init__(self, config, device):
+        super().__init__()
+        self.config = config
+        self.device = device
+        self.input_dim = config.model_params.input_dim
+        self.lstm_input_dim = config.model_params.lstm_input_dim
+        self.lstm_hidden_dim = config.model_params.lstm_hidden_dim
+
+        self.c1 = nn.Conv1d(in_channels=1, out_channels=32, kernel_size=5, stride=2, padding=1)
+        self.bn1 = nn.BatchNorm1d(32)
+        self.c2 = nn.Conv1d(in_channels=32, out_channels=32, kernel_size=7, stride=3, padding=1)
+        self.bn2 = nn.BatchNorm1d(32)
+        self.c3 = nn.Conv1d(in_channels=32, out_channels=32, kernel_size=7, stride=3, padding=1)
+        self.bn3 = nn.BatchNorm1d(32)
+        self.c4 = nn.Conv1d(in_channels=32, out_channels=32, kernel_size=7, stride=3, padding=1)
+        self.bn4 = nn.BatchNorm1d(32)
+        self.lstm = nn.LSTM(input_size=self.lstm_input_dim, hidden_size=self.lstm_hidden_dim, num_layers=1, batch_first=True)
+        self.fc2 = nn.Linear(self.lstm_hidden_dim, 1)
+        self.fc3 = nn.Linear(self.lstm_hidden_dim, 1)
+        self.relu = nn.ReLU()
+        self.sigmoid = torch.nn.Sigmoid()
+        self.critation = nn.MSELoss(reduction='sum')
+        self.critation2 = nn.BCELoss()
+
+    
+    def forward(self, batch, split='train'):
+        
+        x = batch[0].to(self.device)
+        target = batch[1].to(self.device)
+        target2 = target.float()
+        target2 = torch.where(target2 == 0, 0.0, 1.0)
+
+        b, t, _, _ = x.shape
+        x = x.reshape(b*t, 1, self.input_dim)
+        x = self.bn1(F.relu(self.c1(x)))
+        x = self.bn2(F.relu(self.c2(x)))
+        x = self.bn3(F.relu(self.c3(x)))
+        x = self.bn4(F.relu(self.c4(x))) 
+        x = x.reshape(b, t, -1)
+        x, _ = self.lstm(x)
+        
+        x1 = self.fc2(x)
+        pred = x1.reshape(b, -1)
+        loss_mask = (target > 0).int()
+        non_zero = torch.sum(loss_mask, axis=1)
+        loss1 = self.critation(pred*loss_mask, target) / torch.where(non_zero == 0, 1, non_zero)
+        loss1 = sum(loss1)
+
+        x2 = self.fc3(x)
+        pred2 = x2.reshape(b, -1)
+        pred2 = self.sigmoid(pred2)
+        pred2 = torch.reshape(pred2, (b, t))
+        loss2 = self.critation2(pred2, target2)
+
+        return loss1, loss2
+
+    
+    def inference(self, batch):
+        x = batch[0].to(self.device)
+        target = batch[1].to(self.device)
+        b, t, _, _ = x.shape
+        target2 = target.float()
+        target2 = torch.where(target2 == 0, 0.0, 1.0)
+
+        x = x.reshape(b*t, 1, self.input_dim)
+        x = self.bn1(F.relu(self.c1(x)))
+        x = self.bn2(F.relu(self.c2(x)))
+        x = self.bn3(F.relu(self.c3(x)))
+        x = self.bn4(F.relu(self.c4(x)))
+        x = x.reshape(b, t, -1)
+        x, _ = self.lstm(x)
+
+        x1 = self.fc2(x)
+        pred = x1.reshape(b, -1)
+        x2 = self.fc3(x)
+        pred2 = x2.reshape(b, -1)
+        pred2 = (self.sigmoid(pred2) >= 0.5).int()
+
+        return pred, target, pred2, target2
+    
+    
+    def demo_inference(self, spec):
+        x = spec.to(self.device)
+        b, t, _, _ = x.shape
+        x = x.reshape(b*t, 1, self.input_dim)
+        x = self.bn1(F.relu(self.c1(x)))
+        x = self.bn2(F.relu(self.c2(x)))
+        x = self.bn3(F.relu(self.c3(x)))
+        x = self.bn4(F.relu(self.c4(x)))
+        x = x.reshape(b, t, -1)
+        x, _ = self.lstm(x)
+        x1 = self.fc2(x)
+        pred = x1.reshape(b, -1)
+        x2 = self.fc3(x)
+        pred2 = x2.reshape(b, -1)
+        pred2 = (self.sigmoid(pred2) >= 0.5).int()
+
+        return pred, pred2
+
+
+
+class PitchModel_CNNTransformer(nn.Module):
+    
+    def __init__(self, config, device):
+        super().__init__()
+        self.config = config
+        self.device = device
+        self.input_dim = config.model_params.input_dim
+        self.transformer_input_dim = config.model_params.transformer_input_dim
+
+        self.c1 = nn.Conv1d(in_channels=1, out_channels=32, kernel_size=5, stride=2, padding=1)
+        self.bn1 = nn.BatchNorm1d(32)
+        self.c2 = nn.Conv1d(in_channels=32, out_channels=32, kernel_size=7, stride=3, padding=1)
+        self.bn2 = nn.BatchNorm1d(32)
+        self.c3 = nn.Conv1d(in_channels=32, out_channels=32, kernel_size=7, stride=3, padding=1)
+        self.bn3 = nn.BatchNorm1d(32)
+        self.c4 = nn.Conv1d(in_channels=32, out_channels=32, kernel_size=7, stride=3, padding=1)
+        self.bn4 = nn.BatchNorm1d(32)
+        encoder_layers = nn.TransformerEncoderLayer(d_model=self.transformer_input_dim, nhead=8, batch_first=True)
+        self.transformer = nn.TransformerEncoder(encoder_layers, num_layers=1)
+        self.fc2 = nn.Linear(self.transformer_input_dim, 1)
+        self.fc3 = nn.Linear(self.transformer_input_dim, 1)
+        self.relu = nn.ReLU()
+        self.sigmoid = torch.nn.Sigmoid()
+        self.critation = nn.MSELoss(reduction='sum')
+        self.critation2 = nn.BCELoss()
+
+    
+    def forward(self, batch, split='train'):
+        
+        x = batch[0].to(self.device)
+        target = batch[1].to(self.device)
+        target2 = target.float()
+        target2 = torch.where(target2 == 0, 0.0, 1.0)
+
+        b, t, _, _ = x.shape
+        x = x.reshape(b*t, 1, self.input_dim)
+        x = self.bn1(F.relu(self.c1(x)))
+        x = self.bn2(F.relu(self.c2(x)))
+        x = self.bn3(F.relu(self.c3(x)))
+        x = self.bn4(F.relu(self.c4(x))) 
+        x = x.reshape(b, t, -1)
+        x = self.transformer(x)
+        
+        x1 = self.fc2(x)
+        pred = x1.reshape(b, -1)
+        loss_mask = (target > 0).int()
+        non_zero = torch.sum(loss_mask, axis=1)
+        loss1 = self.critation(pred*loss_mask, target) / torch.where(non_zero == 0, 1, non_zero)
+        loss1 = sum(loss1)
+
+        x2 = self.fc3(x)
+        pred2 = x2.reshape(b, -1)
+        pred2 = self.sigmoid(pred2)
+        pred2 = torch.reshape(pred2, (b, t))
+        loss2 = self.critation2(pred2, target2)
+
+        return loss1, loss2
+
+    
+    def inference(self, batch):
+        x = batch[0].to(self.device)
+        target = batch[1].to(self.device)
+        b, t, _, _ = x.shape
+        target2 = target.float()
+        target2 = torch.where(target2 == 0, 0.0, 1.0)
+
+        x = x.reshape(b*t, 1, self.input_dim)
+        x = self.bn1(F.relu(self.c1(x)))
+        x = self.bn2(F.relu(self.c2(x)))
+        x = self.bn3(F.relu(self.c3(x)))
+        x = self.bn4(F.relu(self.c4(x)))
+        x = x.reshape(b, t, -1)
+        x = self.transformer(x)
+
+        x1 = self.fc2(x)
+        pred = x1.reshape(b, -1)
+        x2 = self.fc3(x)
+        pred2 = x2.reshape(b, -1)
+        pred2 = (self.sigmoid(pred2) >= 0.5).int()
+
+        return pred, target, pred2, target2
+    
+    
+    def demo_inference(self, spec):
+        x = spec.to(self.device)
+        b, t, _, _ = x.shape
+        x = x.reshape(b*t, 1, self.input_dim)
+        x = self.bn1(F.relu(self.c1(x)))
+        x = self.bn2(F.relu(self.c2(x)))
+        x = self.bn3(F.relu(self.c3(x)))
+        x = self.bn4(F.relu(self.c4(x)))
+        x = x.reshape(b, t, -1)
+        x = self.transformer(x)
+        x1 = self.fc2(x)
+        pred = x1.reshape(b, -1)
+        x2 = self.fc3(x)
+        pred2 = x2.reshape(b, -1)
+        pred2 = (self.sigmoid(pred2) >= 0.5).int()
+
+        return pred, pred2
+
+
+
 class PitchModel_CREPE(nn.Module):
     
     def __init__(self, config, device):
@@ -498,7 +704,6 @@ class PitchModel_MB_CNNLSTM(nn.Module):
         self.convB1 = nn.Conv1d(in_channels=64, out_channels=64, kernel_size=3, stride=2)
         self.convB2 = nn.Conv1d(in_channels=64, out_channels=64, kernel_size=5, stride=2)
         self.convB3 = nn.Conv1d(in_channels=64, out_channels=64, kernel_size=7, stride=2)
-        # self.bn = nn.BatchNorm1d(64)
         self.maxpool = nn.MaxPool1d(16)
         self.dropout = nn.Dropout(0.25)
         self.lstm = nn.LSTM(input_size=self.lstm_input_dim, hidden_size=self.lstm_hidden_dim, num_layers=1, batch_first=True, bidirectional=False)
@@ -529,7 +734,7 @@ class PitchModel_MB_CNNLSTM(nn.Module):
         x3 = self.dropout(F.relu(self.convB3(x)))
         x = torch.cat([x1, x2, x3], dim=-1)
         x = self.maxpool(self.maxpool(x))
-        x = x.reshape(t, -1)
+        x = x.reshape(b*t, -1)
         x, _ = self.lstm(x)
         
         x1 = self.fc2(x)
@@ -567,7 +772,7 @@ class PitchModel_MB_CNNLSTM(nn.Module):
         x3 = self.dropout(F.relu(self.convB3(x)))
         x = torch.cat([x1, x2, x3], dim=-1)
         x = self.maxpool(self.maxpool(x))
-        x = x.reshape(t, -1)
+        x = x.reshape(b*t, -1)
         x, _ = self.lstm(x)
 
         x1 = self.fc2(x)
@@ -594,7 +799,7 @@ class PitchModel_MB_CNNLSTM(nn.Module):
         x3 = self.dropout(F.relu(self.convB3(x)))
         x = torch.cat([x1, x2, x3], dim=-1)
         x = self.maxpool(self.maxpool(x))
-        x = x.reshape(t, -1)
+        x = x.reshape(b*t, -1)
         x, _ = self.lstm(x)
         x1 = self.fc2(x)
         pred = x1.reshape(b, -1)
@@ -708,6 +913,112 @@ class PitchModel_CNN10(nn.Module):
         x = x.reshape(x.shape[0], -1)
         x = self.relu(self.fc1(x))
         x = x.reshape(b, t, -1)
+        x1 = self.fc2(x)
+        pred = x1.reshape(b, -1)
+        x2 = self.fc3(x)
+        pred2 = x2.reshape(b, -1)
+        pred2 = (self.sigmoid(pred2) >= 0.5).int()
+        
+        return pred, pred2
+
+
+
+class PitchModel_CNN10LSTM(nn.Module):
+    
+    def __init__(self, config, device):
+        super().__init__() 
+        self.config = config
+        self.device = device
+        self.input_dim = config.model_params.input_dim
+        self.lstm_input_dim = config.model_params.lstm_input_dim
+        self.lstm_hidden_dim = config.model_params.lstm_hidden_dim
+
+        self.c1 = nn.Conv2d(1, 32, (5, 5), padding=2, stride=(2, 2))
+        self.bn1 = nn.BatchNorm2d(32)
+        self.c2 = nn.Conv2d(32, 32, (7, 5), padding=(3, 2), stride=(3, 2))
+        self.bn2 = nn.BatchNorm2d(32)
+        self.c3 = nn.Conv2d(32, 32, (7, 5), padding=(3, 2), stride=(3, 2))
+        self.bn3 = nn.BatchNorm2d(32)
+        self.c4 = nn.Conv2d(32, 32, (7, 5), padding=(3, 2), stride=(3, 2))
+        self.bn4 = nn.BatchNorm2d(32)
+        self.lstm = nn.LSTM(input_size=self.lstm_input_dim, hidden_size=self.lstm_hidden_dim, num_layers=1, batch_first=True, bidirectional=False)
+        self.fc2 = nn.Linear(self.lstm_hidden_dim, 1)
+        self.fc3 = nn.Linear(self.lstm_hidden_dim, 1)
+        self.relu = nn.ReLU()
+        self.sigmoid = torch.nn.Sigmoid() 
+        self.critation = nn.MSELoss(reduction='sum')
+        self.critation2 = nn.BCELoss()
+    
+    
+    def forward(self, batch, split='train'):
+        
+        x = batch[0].to(self.device)
+        target = batch[1].to(self.device)
+        target2 = target.float()
+        target2 = torch.where(target2 == 0, 0.0, 1.0)
+
+        b, t, _, _ = x.shape
+        x = x.reshape(b*t, self.input_dim, 10)
+        x = torch.unsqueeze(x, dim=1)
+        x = self.bn1(F.relu(self.c1(x)))
+        x = self.bn2(F.relu(self.c2(x)))
+        x = self.bn3(F.relu(self.c3(x)))
+        x = self.bn4(F.relu(self.c4(x)))
+        x = x.reshape(b, t, -1)
+        x, _ = self.lstm(x)
+        
+        x1 = self.fc2(x)
+        pred = x1.reshape(b, -1)
+        loss_mask = (target > 0).int()
+        loss1 = self.critation(pred*loss_mask, target) / torch.sum(loss_mask, axis=1)
+        loss1 = sum(loss1)
+        
+        x2 = self.fc3(x)
+        pred2 = x2.reshape(b, -1)
+        pred2 = self.sigmoid(pred2)
+        pred2 = torch.reshape(pred2, (b, t))
+        loss2 = self.critation2(pred2, target2)
+        
+        return loss1, loss2
+
+    
+    def inference(self, batch):
+        
+        x = batch[0].to(self.device)
+        target = batch[1].to(self.device)
+        target2 = target.float()
+        target2 = torch.where(target2 == 0, 0.0, 1.0)
+
+        b, t, _, _ = x.shape
+        x = x.reshape(b*t, self.input_dim, 10)
+        x = torch.unsqueeze(x, dim=1)
+        x = self.bn1(F.relu(self.c1(x)))
+        x = self.bn2(F.relu(self.c2(x)))
+        x = self.bn3(F.relu(self.c3(x)))
+        x = self.bn4(F.relu(self.c4(x)))
+        x = x.reshape(b, t, -1)
+        x, _ = self.lstm(x)
+        
+        x1 = self.fc2(x)
+        pred = x1.reshape(b, -1)
+        x2 = self.fc3(x)
+        pred2 = x2.reshape(b, -1)
+        pred2 = (self.sigmoid(pred2) >= 0.5).int()
+        
+        return pred, target, pred2, target2
+    
+    
+    def demo_inference(self, spec):   
+        x = spec.to(self.device)
+        b, t, _, _ = x.shape
+        x = x.reshape(b*t, self.input_dim, 10)
+        x = torch.unsqueeze(x, dim=1)
+        x = self.bn1(F.relu(self.c1(x)))
+        x = self.bn2(F.relu(self.c2(x)))
+        x = self.bn3(F.relu(self.c3(x)))
+        x = self.bn4(F.relu(self.c4(x)))
+        x = x.reshape(b, t, -1)
+        x, _ = self.lstm(x)
         x1 = self.fc2(x)
         pred = x1.reshape(b, -1)
         x2 = self.fc3(x)
