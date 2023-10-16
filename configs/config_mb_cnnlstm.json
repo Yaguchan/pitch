@@ -1,14 +1,14 @@
 {   
-    "outdir": "exp/width1_shift1/mb_cnnlstm",
+    "outdir": "exp/CSJ/width1_shift1/mb_cnnlstm",
     "seed": 42,
     "cuda": true,
     "gpu_device": 0,
     "model": 7,
     "data_params": {
-        "data_dir": "/mnt/aoni04/yaguchi/code/pitch/data/width1_shift1"
+        "data_dir": "/mnt/aoni04/yaguchi/code/pitch/data/CSJ/width1_shift1"
     },
     "img_params": {
-        "data_dir": "/mnt/aoni04/yaguchi/code/pitch/img/width1_shift1/mb_cnnlstm",
+        "data_dir": "/mnt/aoni04/yaguchi/code/pitch/img/CSJ/width1_shift1/mb_cnnlstm",
         "data_shift": 10,
         "start": 10000,
         "end": 13000
